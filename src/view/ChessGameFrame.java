@@ -31,6 +31,7 @@ public class ChessGameFrame extends JFrame {
         addResetButton();
         addLoadButton();
         addSaveButton();
+        addWithdrawButton();
     }
 
 
@@ -89,5 +90,15 @@ public class ChessGameFrame extends JFrame {
         add(button);
         button.addActionListener(e -> gameController.saveGameToFile());
     }
+
+    private void addWithdrawButton() {
+        JButton button = new JButton("Withdraw");
+        button.setLocation(HEIGHT, HEIGHT / 10 + 480);
+        button.setSize(200, 60);
+        button.setFont(new Font("Rockwell", Font.BOLD, 20));
+        add(button);
+        button.addActionListener(e -> gameController.withdraw());
+    }
+
 
 }

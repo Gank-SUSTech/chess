@@ -3,6 +3,9 @@ package controller;
 
 import model.ChessComponent;
 import view.Chessboard;
+import view.ChessboardPoint;
+
+import java.util.List;
 
 public class ClickController {
     private final Chessboard chessboard;
@@ -18,18 +21,36 @@ public class ClickController {
                 chessComponent.setSelected(true);
                 first = chessComponent;
                 first.repaint();
+                List<ChessboardPoint> lChessboardPoints = first.canMoveTo(chessboard.getChessComponents());
+                for (ChessboardPoint chessboardPoint : lChessboardPoints) {
+                    int x = chessboardPoint.getX(), y = chessboardPoint.getY();
+                    chessboard.getChessComponents()[x][y].setReached(true);
+                    chessboard.getChessComponents()[x][y].repaint();
+                }
             }
         } else {
             if (first == chessComponent) { // 再次点击取消选取
                 chessComponent.setSelected(false);
+                List<ChessboardPoint> lChessboardPoints = first.canMoveTo(chessboard.getChessComponents());
+                for (ChessboardPoint chessboardPoint : lChessboardPoints) {
+                    int x = chessboardPoint.getX(), y = chessboardPoint.getY();
+                    chessboard.getChessComponents()[x][y].setReached(false);
+                    chessboard.getChessComponents()[x][y].repaint();
+                }
                 ChessComponent recordFirst = first;
                 first = null;
                 recordFirst.repaint();
             } else if (handleSecond(chessComponent)) {
                 //repaint in swap chess method.
+                List<ChessboardPoint> lChessboardPoints = first.canMoveTo(chessboard.getChessComponents());
+                for (ChessboardPoint chessboardPoint : lChessboardPoints) {
+                    int x = chessboardPoint.getX(), y = chessboardPoint.getY();
+                    chessboard.getChessComponents()[x][y].setReached(false);
+                    chessboard.getChessComponents()[x][y].repaint();
+                }
                 chessboard.swapChessComponents(first, chessComponent);
                 chessboard.swapColor();
-
+                chessboard.addHistory();
                 first.setSelected(false);
                 first = null;
             }
@@ -41,6 +62,7 @@ public class ClickController {
      * @param chessComponent 目标选取的棋子
      * @return 目标选取的棋子是否与棋盘记录的当前行棋方颜色相同
      */
+
 
     private boolean handleFirst(ChessComponent chessComponent) {
         return chessComponent.getChessColor() == chessboard.getCurrentColor();
@@ -55,4 +77,5 @@ public class ClickController {
         return chessComponent.getChessColor() != chessboard.getCurrentColor() &&
                 first.canMoveTo(chessboard.getChessComponents(), chessComponent.getChessboardPoint());
     }
+
 }

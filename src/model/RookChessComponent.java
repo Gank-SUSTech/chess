@@ -1,7 +1,7 @@
 package model;
 
-import view.ChessboardPoint;
 import controller.ClickController;
+import view.ChessboardPoint;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 /**
  * 这个类表示国际象棋里面的车
  */
@@ -77,6 +78,17 @@ public class RookChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
+        List<ChessboardPoint> lChessboardPoints = canMoveTo(chessComponents);
+        lChessboardPoints.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        for (ChessboardPoint chessboardPoint : lChessboardPoints) {
+            if (chessboardPoint.toString().equals(destination.toString()))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
         List<ChessboardPoint> lChessboardPoints = new ArrayList<>();
         ChessboardPoint source = getChessboardPoint();
         ChessColor chessColor = getChessColor();
@@ -140,15 +152,9 @@ public class RookChessComponent extends ChessComponent {
         }
 
         lChessboardPoints.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-
-        for (ChessboardPoint chessboardPoint : lChessboardPoints) {
-            if (chessboardPoint.getX()==destination.getX() && chessboardPoint.getY()==destination.getY())
-            return true;
-        }
-        return false;
-        // return lChessboardPoints.contains( destination);
+        return lChessboardPoints;
     }
-        // return lChessboardPoints;
+
     /**
      * 注意这个方法，每当窗体受到了形状的变化，或者是通知要进行绘图的时候，就会调用这个方法进行画图。
      *
@@ -158,16 +164,20 @@ public class RookChessComponent extends ChessComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 //        g.drawImage(rookImage, 0, 0, getWidth() - 13, getHeight() - 20, this);
-        g.drawImage(rookImage, 0, 0, getWidth() , getHeight(), this);
+        g.drawImage(rookImage, 0, 0, getWidth(), getHeight(), this);
         g.setColor(Color.BLACK);
         if (isSelected()) { // Highlights the model if selected.
             g.setColor(Color.RED);
-            g.drawOval(0, 0, getWidth() , getHeight());
+            g.drawOval(0, 0, getWidth(), getHeight());
+        }
+        if (isReached()){
+            g.setColor(Color.GREEN);
+            g.drawOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
         }
     }
 
     @Override
     public String toString() {
-        return  chessColor == ChessColor.WHITE ?"r":"R";
+        return chessColor == ChessColor.WHITE ? "r" : "R";
     }
 }

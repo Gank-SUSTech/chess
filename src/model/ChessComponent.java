@@ -4,10 +4,10 @@ import view.ChessboardPoint;
 import controller.ClickController;
 
 import javax.swing.*;
+import java.util.List;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-
 /**
  * 这个类是一个抽象类，主要表示8*8棋盘上每个格子的棋子情况，当前有两个子类继承它，分别是EmptySlotComponent(空棋子)和RookChessComponent(车)。
  */
@@ -38,6 +38,7 @@ public abstract class ChessComponent extends JComponent {
     private ChessboardPoint chessboardPoint;
     protected final ChessColor chessColor;
     private boolean selected;
+    private boolean reached;
 
     protected ChessComponent(ChessboardPoint chessboardPoint, Point location, ChessColor chessColor, ClickController clickController, int size) {
         enableEvents(AWTEvent.MOUSE_EVENT_MASK);
@@ -65,8 +66,16 @@ public abstract class ChessComponent extends JComponent {
         return selected;
     }
 
+    public boolean isReached() {
+        return reached;
+    }
+
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public void setReached(boolean reached) {
+        this.reached = reached;
     }
 
     /**
@@ -106,7 +115,7 @@ public abstract class ChessComponent extends JComponent {
      * 这个方法主要是检查移动的合法性，如果合法就返回true，反之是false
      */
     public abstract boolean canMoveTo(ChessComponent[][] chessboard, ChessboardPoint destination);
-    // public abstract List<ChessboardPoint> canMoveTo();
+    public abstract List<ChessboardPoint> canMoveTo(ChessComponent[][] chessboard);
     /**
      * 这个方法主要用于加载一些特定资源，如棋子图片等等。
      *
