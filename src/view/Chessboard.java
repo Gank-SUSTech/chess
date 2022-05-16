@@ -40,7 +40,6 @@ public class Chessboard extends JComponent {
         setLayout(null); // Use absolute layout.
         setSize(width, height);
         CHESS_SIZE = width / 8;
-
         initBoard();
         addHistory();
     }
@@ -194,8 +193,6 @@ public class Chessboard extends JComponent {
         if (player.equals("b"))
             currentColor = black;
         this.repaint();
-        clearHistory();
-        addHistory();
         setStatus();
     }
 
@@ -206,6 +203,9 @@ public class Chessboard extends JComponent {
         initBoard();
         currentColor = ChessColor.WHITE;
         setStatus();
+        while  (chessHistory.size()>1) 
+            chessHistory.remove(chessHistory.size() - 1);
+        addHistory();
     }
 
     public void setStatus() {
@@ -261,7 +261,7 @@ public class Chessboard extends JComponent {
     }
 
     public void removeHistory() {
-        if (!chessHistory.isEmpty()) {
+        if (chessHistory.size()>1) {
             chessHistory.remove(chessHistory.size() - 1);
         }
     }

@@ -67,9 +67,11 @@ public class GameController {
                     e.printStackTrace();
                 }
             }
-//            System.out.println("open file----" + f.getName());
+            // System.out.println("open file----" + f.getName());
             if (checkChessData(chessData)) {
                 chessboard.loadGame(chessData);
+                chessboard.clearHistory();
+                chessboard.addHistory();
                 return chessData;
             }
         }
@@ -114,6 +116,8 @@ public class GameController {
 
     public void resetGame() {
         chessboard.clear();
+        chessboard.clearHistory();
+        chessboard.addHistory();
     }
 
     public void saveGameToFile() {
@@ -160,7 +164,7 @@ public class GameController {
 
     public void withdraw(){
         List <String> chessHistory = chessboard.getChessHistory();
-        if (chessHistory.size()>1){
+        if (chessHistory.size() > 1){
             String str = chessHistory.get(chessHistory.size()-2);
             String[] s = str.split("\n");
             List <String> chessData =new ArrayList<>();

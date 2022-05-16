@@ -2,9 +2,11 @@ package controller;
 
 
 import model.ChessComponent;
+import model.KingChessComponent;
 import view.Chessboard;
 import view.ChessboardPoint;
 
+import javax.swing.*;
 import java.util.List;
 
 public class ClickController {
@@ -22,7 +24,7 @@ public class ClickController {
                 first = chessComponent;
                 first.repaint();
                 List<ChessboardPoint> lChessboardPoints = first.canMoveTo(chessboard.getChessComponents());
-                for (ChessboardPoint chessboardPoint : lChessboardPoints) {
+                for (ChessboardPoint chessboardPoint : lChessboardPoints) { // CanReached
                     int x = chessboardPoint.getX(), y = chessboardPoint.getY();
                     chessboard.getChessComponents()[x][y].setReached(true);
                     chessboard.getChessComponents()[x][y].repaint();
@@ -50,9 +52,13 @@ public class ClickController {
                 }
                 chessboard.swapChessComponents(first, chessComponent);
                 chessboard.swapColor();
-                chessboard.addHistory();
+                if (isCheck())
+                    JOptionPane.showMessageDialog(null, "将军！", "alert", JOptionPane.WARNING_MESSAGE);
                 first.setSelected(false);
+                first.repaint();
                 first = null;
+
+                chessboard.addHistory();
             }
         }
         chessboard.setStatus();
@@ -76,6 +82,20 @@ public class ClickController {
     private boolean handleSecond(ChessComponent chessComponent) {
         return chessComponent.getChessColor() != chessboard.getCurrentColor() &&
                 first.canMoveTo(chessboard.getChessComponents(), chessComponent.getChessboardPoint());
+    }
+
+    boolean isCheck() {
+        ChessComponent[][] chessComponents = chessboard.getChessComponents();
+        List<ChessboardPoint> lChessboardPoints = first.canMoveTo(chessComponents);
+        for (ChessComponent[] chessComponents2 : chessComponents)
+            for (ChessComponent chess : chessComponents2)
+                if (chess instanceof KingChessComponent && chess.getChessColor() == chessboard.getCurrentColor()) {
+                    ChessboardPoint destination = chess.getChessboardPoint();
+                    for (ChessboardPoint chessboardPoint : lChessboardPoints)
+                        if (chessboardPoint.toString().equals(destination.toString()))
+                            return true;
+                }
+        return false;
     }
 
 }
