@@ -1,7 +1,5 @@
 package controller;
 
-import model.ChessColor;
-import model.ChessComponent;
 import view.Chessboard;
 
 import javax.swing.*;
@@ -14,7 +12,7 @@ import java.util.List;
 public class GameController {
     private Chessboard chessboard;
 
-//    private List<String> chessHistory = new ArrayList<>();
+    // private List<String> chessHistory = new ArrayList<>();
 
     public GameController(Chessboard chessboard) {
         this.chessboard = chessboard;
@@ -27,7 +25,7 @@ public class GameController {
         fc.setFileFilter(filter);
         fc.setMultiSelectionEnabled(false);
         fc.setDialogTitle("Open File");
-        //这里显示打开文件的对话框
+        // 这里显示打开文件的对话框
         int flag = 0;
         try {
             flag = fc.showOpenDialog(null);
@@ -35,16 +33,16 @@ public class GameController {
             System.out.println("Open File Dialog ERROR!");
         }
 
-        //如果按下确定按钮，则获得该文件。
+        // 如果按下确定按钮，则获得该文件。
         if (flag == JFileChooser.APPROVE_OPTION) {
-            //获得该文件
+            // 获得该文件
             File f = fc.getSelectedFile();
             if (!f.getPath().endsWith(".txt")) {
                 JOptionPane.showMessageDialog(null, "文件格式错误\n" +
                         "错误编码： 104", "alert", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
-            InputStreamReader read = null;//考虑到编码格式
+            InputStreamReader read = null;// 考虑到编码格式
             try {
                 read = new InputStreamReader(
                         new FileInputStream(f), "GBK");
@@ -67,47 +65,52 @@ public class GameController {
                     e.printStackTrace();
                 }
             }
-            // System.out.println("open file----" + f.getName());
             if (checkChessData(chessData)) {
                 chessboard.loadGame(chessData);
-                chessboard.clearHistory();
-                chessboard.addHistory();
                 return chessData;
             }
         }
         return null;
     }
 
-    private boolean checkChessData(List<String> chessData) {
-        String str2 = "rnbkqp_RNBKQP";
-        if (chessData.size() == 8) {
-            JOptionPane.showMessageDialog(null, "缺少行棋方\n" +
-                    "错误编码： 103", "alert", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
+    private boolean checkChessData(List<String> chessDatas) {
+        for (String str : chessDatas) {
+            String[] strings = str.split("/");
+            List<String> chessData = new ArrayList<>();
+            for (String s : strings) {
+                chessData.add(s);
+            }
 
-        if (chessData.size() != 9) {
-            JOptionPane.showMessageDialog(null, "数据错误\n" +
-                    "棋盘数据长度错误", "alert", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        if (!(chessData.get(8).equals("w") || chessData.get(8).equals("b"))) {
-            JOptionPane.showMessageDialog(null, "行棋方数据错误\n" +
-                    "错误编码： 103", "alert", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        for (int i = 0; i < 8; i++) {
-            if (chessData.get(i).length() != 8) {
-                JOptionPane.showMessageDialog(null, "棋盘并非8*8\n" +
-                        "错误编码： 101", "alert", JOptionPane.ERROR_MESSAGE);
+            if (chessData.size() == 8) {
+                JOptionPane.showMessageDialog(null, "缺少行棋方\n" +
+                        "错误编码： 103", "alert", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
-            for (int j = 0; j < 8; j++) {
-                String str1 = String.valueOf(chessData.get(i).charAt(j));
-                if (!str2.contains(str1)) {
-                    JOptionPane.showMessageDialog(null, "棋子并非六种之一，棋子并非黑白棋子\n" +
-                            "错误编码： 102", "alert", JOptionPane.ERROR_MESSAGE);
+
+            if (chessData.size() != 9) {
+                JOptionPane.showMessageDialog(null, "数据错误\n" +
+                        "棋盘数据长度错误", "alert", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            if (!(chessData.get(8).equals("w") || chessData.get(8).equals("b"))) {
+                JOptionPane.showMessageDialog(null, "行棋方数据错误\n" +
+                        "错误编码： 103", "alert", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            for (int i = 0; i < 8; i++) {
+                if (chessData.get(i).length() != 8) {
+                    JOptionPane.showMessageDialog(null, "棋盘并非8*8\n" +
+                            "错误编码： 101", "alert", JOptionPane.ERROR_MESSAGE);
                     return false;
+                }
+                for (int j = 0; j < 8; j++) {
+                    String str1 = String.valueOf(chessData.get(i).charAt(j));
+                    String str2 = "rnbkqp_RNBKQP";
+                    if (!str2.contains(str1)) {
+                        JOptionPane.showMessageDialog(null, "棋子并非六种之一，棋子并非黑白棋子\n" +
+                                "错误编码： 102", "alert", JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
                 }
             }
         }
@@ -121,16 +124,12 @@ public class GameController {
     }
 
     public void saveGameToFile() {
-        String curUser = chessboard.getCurrentColor() == ChessColor.WHITE ? "w" : "b";
-        ChessComponent[][] component = chessboard.getChessComponents();
+        List<String> historyList = chessboard.getChessHistory();
         StringBuilder buf = new StringBuilder();
-        for (ChessComponent[] chessComponents : component) {
-            for (ChessComponent chessComponent : chessComponents) {
-                buf.append(chessComponent.toString());
-            }
+        for (String str : historyList) {
+            buf.append(str);
             buf.append("\n");
         }
-        buf.append(curUser);
 
         FileNameExtensionFilter filter = new FileNameExtensionFilter("*.txt", "txt");
         JFileChooser fc = new JFileChooser();
@@ -162,23 +161,21 @@ public class GameController {
         }
     }
 
-    public void withdraw(){
-        List <String> chessHistory = chessboard.getChessHistory();
-        if (chessHistory.size() > 1){
-            String str = chessHistory.get(chessHistory.size()-2);
-            String[] s = str.split("\n");
-            List <String> chessData =new ArrayList<>();
-            for (int i = 0; i < s.length; i++) {
-                chessData.add(s[i]);
-            }
-            chessboard.loadGame(chessData);
+    public void withdraw() {
+        List<String> chessHistory = chessboard.getChessHistory();
+        if (chessHistory.size() > 1) {
             chessboard.removeHistory();
-        }else{
-            JOptionPane.showMessageDialog(null, "无棋可悔" , "alert", JOptionPane.INFORMATION_MESSAGE);
+            chessboard.loadGame(chessHistory);
+        } else {
+            JOptionPane.showMessageDialog(null, "无棋可悔", "alert", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
+    public void playback() {
+        List<String> chessDatas = loadGameFromFile();
+        // chessboard.setClickControllerPlayback();
+        System.out.println(chessDatas);
+
+    }
+
 }
-
-
-
-

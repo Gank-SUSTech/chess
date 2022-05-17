@@ -123,11 +123,6 @@ public class KnightChessComponent extends ChessComponent {
             g.setColor(Color.RED);
             g.drawOval(0, 0, getWidth(), getHeight());
         }
-        if (isReached()) {
-            g.setColor(Color.GREEN);
-            g.drawOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
-        }
-
     }
 
     @Override

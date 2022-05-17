@@ -1,6 +1,5 @@
 package view;
 
-
 import controller.ClickController;
 import model.*;
 
@@ -29,12 +28,11 @@ public class Chessboard extends JComponent {
     private final ChessComponent[][] chessComponents = new ChessComponent[CHESSBOARD_SIZE][CHESSBOARD_SIZE];
     // private ChessColor currentColor = ChessColor.BLACK;
     private ChessColor currentColor = ChessColor.WHITE;
-    //all chessComponents in this chessboard are shared only one model controller
+    // all chessComponents in this chessboard are shared only one model controller
     private final ClickController clickController = new ClickController(this);
     private final int CHESS_SIZE;
 
     private List<String> chessHistory = new ArrayList<>();
-
 
     public Chessboard(int width, int height) {
         setLayout(null); // Use absolute layout.
@@ -44,8 +42,16 @@ public class Chessboard extends JComponent {
         addHistory();
     }
 
+    // public void setClickControllerPlayback() {
+        // this.clickController = new ClickControllerPlayback(this);
+    // }
+
     public ChessComponent[][] getChessComponents() {
         return chessComponents;
+    }
+
+    public int getCHESS_SIZE() {
+        return CHESS_SIZE;
     }
 
     public ChessColor getCurrentColor() {
@@ -65,13 +71,55 @@ public class Chessboard extends JComponent {
         // Note that chess1 has higher priority, 'destroys' chess2 if exists.
         if (!(chess2 instanceof EmptySlotComponent)) {
             remove(chess2);
-            add(chess2 = new EmptySlotComponent(chess2.getChessboardPoint(), chess2.getLocation(), clickController, CHESS_SIZE));
+            add(chess2 = new EmptySlotComponent(chess2.getChessboardPoint(), chess2.getLocation(), clickController,
+                    CHESS_SIZE));
         }
         chess1.swapLocation(chess2);
         int row1 = chess1.getChessboardPoint().getX(), col1 = chess1.getChessboardPoint().getY();
         chessComponents[row1][col1] = chess1;
+        ChessColor chessColor = chess1.getChessColor();
         int row2 = chess2.getChessboardPoint().getX(), col2 = chess2.getChessboardPoint().getY();
         chessComponents[row2][col2] = chess2;
+
+        if (chess1 instanceof PawnChessComponent) {
+            if (row1 == 0 || row1 == 7) {
+                int sl = JOptionPane.showOptionDialog(null, "请选择要变的棋子", "恭喜兵升变", JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.QUESTION_MESSAGE, null, new String[] { "Queen", "Rook", "Knight", "Bishop" },
+                        "Queen");
+                switch (sl) {
+                    case 0:
+                        remove(chess1);
+                        add(chess1 = new QueenChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
+                                chessColor, clickController, CHESS_SIZE));
+                        chessComponents[row1][col1] = chess1;
+                        break;
+                    case 1:
+                        remove(chess1);
+                        add(chess1 = new RookChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
+                                chessColor, clickController, CHESS_SIZE));
+                        chessComponents[row1][col1] = chess1;
+                        break;
+                    case 2:
+                        remove(chess1);
+                        add(chess1 = new KnightChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
+                                chessColor, clickController, CHESS_SIZE));
+                        chessComponents[row1][col1] = chess1;
+                        break;
+                    case 3:
+                        remove(chess1);
+                        add(chess1 = new BishopChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
+                                chessColor, clickController, CHESS_SIZE));
+                        chessComponents[row1][col1] = chess1;
+                        break;
+                    default:
+                        remove(chess1);
+                        add(chess1 = new QueenChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
+                                chessColor, clickController, CHESS_SIZE));
+                        chessComponents[row1][col1] = chess1;
+                        break;
+                }
+            }
+        }
 
         chess1.repaint();
         chess2.repaint();
@@ -80,7 +128,8 @@ public class Chessboard extends JComponent {
     public void initiateEmptyChessboard() {
         for (int i = 0; i < chessComponents.length; i++) {
             for (int j = 0; j < chessComponents[i].length; j++) {
-                putChessOnBoard(new EmptySlotComponent(new ChessboardPoint(i, j), calculatePoint(i, j), clickController, CHESS_SIZE));
+                putChessOnBoard(new EmptySlotComponent(new ChessboardPoint(i, j), calculatePoint(i, j), clickController,
+                        CHESS_SIZE));
             }
         }
     }
@@ -90,37 +139,43 @@ public class Chessboard extends JComponent {
     }
 
     private void initPawnOnBoard(int row, int col, ChessColor color) {
-        ChessComponent chessComponent = new PawnChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col), color, clickController, CHESS_SIZE);
+        ChessComponent chessComponent = new PawnChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col),
+                color, clickController, CHESS_SIZE);
         chessComponent.setVisible(true);
         putChessOnBoard(chessComponent);
     }
 
     private void initRookOnBoard(int row, int col, ChessColor color) {
-        ChessComponent chessComponent = new RookChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col), color, clickController, CHESS_SIZE);
+        ChessComponent chessComponent = new RookChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col),
+                color, clickController, CHESS_SIZE);
         chessComponent.setVisible(true);
         putChessOnBoard(chessComponent);
     }
 
     private void initKnightOnBoard(int row, int col, ChessColor color) {
-        ChessComponent chessComponent = new KnightChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col), color, clickController, CHESS_SIZE);
+        ChessComponent chessComponent = new KnightChessComponent(new ChessboardPoint(row, col),
+                calculatePoint(row, col), color, clickController, CHESS_SIZE);
         chessComponent.setVisible(true);
         putChessOnBoard(chessComponent);
     }
 
     private void initBishopOnBoard(int row, int col, ChessColor color) {
-        ChessComponent chessComponent = new BishopChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col), color, clickController, CHESS_SIZE);
+        ChessComponent chessComponent = new BishopChessComponent(new ChessboardPoint(row, col),
+                calculatePoint(row, col), color, clickController, CHESS_SIZE);
         chessComponent.setVisible(true);
         putChessOnBoard(chessComponent);
     }
 
     private void initKingOnBoard(int row, int col, ChessColor color) {
-        ChessComponent chessComponent = new KingChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col), color, clickController, CHESS_SIZE);
+        ChessComponent chessComponent = new KingChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col),
+                color, clickController, CHESS_SIZE);
         chessComponent.setVisible(true);
         putChessOnBoard(chessComponent);
     }
 
     private void initQueenOnBoard(int row, int col, ChessColor color) {
-        ChessComponent chessComponent = new QueenChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col), color, clickController, CHESS_SIZE);
+        ChessComponent chessComponent = new QueenChessComponent(new ChessboardPoint(row, col), calculatePoint(row, col),
+                color, clickController, CHESS_SIZE);
         chessComponent.setVisible(true);
         putChessOnBoard(chessComponent);
     }
@@ -131,79 +186,89 @@ public class Chessboard extends JComponent {
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
-
     private Point calculatePoint(int row, int col) {
         return new Point(col * CHESS_SIZE, row * CHESS_SIZE);
     }
 
-    public void loadGame(List<String> chessData) {
-        ChessColor black = ChessColor.BLACK, white = ChessColor.WHITE;
-        for (int i = 0; i < 8; i++) {
-            String s = chessData.get(i);
-            for (int j = 0; j < s.length(); j++) {
-                char c = s.charAt(j);
-                switch (c) {
-                    case 'R':
-                        initRookOnBoard(i, j, black);
-                        break;
-                    case 'r':
-                        initRookOnBoard(i, j, white);
-                        break;
-                    case 'N':
-                        initKnightOnBoard(i, j, black);
-                        break;
-                    case 'n':
-                        initKnightOnBoard(i, j, white);
-                        break;
-                    case 'B':
-                        initBishopOnBoard(i, j, black);
-                        break;
-                    case 'b':
-                        initBishopOnBoard(i, j, white);
-                        break;
-                    case 'Q':
-                        initQueenOnBoard(i, j, black);
-                        break;
-                    case 'q':
-                        initQueenOnBoard(i, j, white);
-                        break;
-                    case 'K':
-                        initKingOnBoard(i, j, black);
-                        break;
-                    case 'k':
-                        initKingOnBoard(i, j, white);
-                        break;
-                    case 'P':
-                        initPawnOnBoard(i, j, black);
-                        break;
-                    case 'p':
-                        initPawnOnBoard(i, j, white);
-                        break;
-                    case '_':
-                        putChessOnBoard(new EmptySlotComponent(new ChessboardPoint(i, j), calculatePoint(i, j), clickController, CHESS_SIZE));
-                        break;
-                    default:
-                        break;
+    public void loadGame(List<String> chessDatas) {
+        chessHistory = chessDatas;
+        if (chessDatas.size() >= 1) {
+            String str = chessDatas.get(chessDatas.size() - 1);
+            String[] strings = str.split("/");
+            List<String> chessData = new ArrayList<>();
+            for (String s : strings) {
+                chessData.add(s);
+            }
+            ChessColor black = ChessColor.BLACK, white = ChessColor.WHITE;
+            for (int i = 0; i < 8; i++) {
+                String s = chessData.get(i);
+                for (int j = 0; j < s.length(); j++) {
+                    char c = s.charAt(j);
+                    switch (c) {
+                        case 'R':
+                            initRookOnBoard(i, j, black);
+                            break;
+                        case 'r':
+                            initRookOnBoard(i, j, white);
+                            break;
+                        case 'N':
+                            initKnightOnBoard(i, j, black);
+                            break;
+                        case 'n':
+                            initKnightOnBoard(i, j, white);
+                            break;
+                        case 'B':
+                            initBishopOnBoard(i, j, black);
+                            break;
+                        case 'b':
+                            initBishopOnBoard(i, j, white);
+                            break;
+                        case 'Q':
+                            initQueenOnBoard(i, j, black);
+                            break;
+                        case 'q':
+                            initQueenOnBoard(i, j, white);
+                            break;
+                        case 'K':
+                            initKingOnBoard(i, j, black);
+                            break;
+                        case 'k':
+                            initKingOnBoard(i, j, white);
+                            break;
+                        case 'P':
+                            initPawnOnBoard(i, j, black);
+                            break;
+                        case 'p':
+                            initPawnOnBoard(i, j, white);
+                            break;
+                        case '_':
+                            putChessOnBoard(new EmptySlotComponent(new ChessboardPoint(i, j), calculatePoint(i, j),
+                                    clickController, CHESS_SIZE));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
+            String player = chessData.get(8);
+            if (player.equals("w"))
+                currentColor = white;
+            if (player.equals("b"))
+                currentColor = black;
+            this.repaint();
+            setStatus();
         }
-        String player = chessData.get(8);
-        if (player.equals("w"))
-            currentColor = white;
-        if (player.equals("b"))
-            currentColor = black;
-        this.repaint();
-        setStatus();
     }
 
     public void clear() {
         for (ChessComponent[] chessComponent : chessComponents)
-            for (ChessComponent component : chessComponent) remove(component);
+            for (ChessComponent component : chessComponent)
+                remove(component);
         this.repaint();
         initBoard();
         currentColor = ChessColor.WHITE;
         setStatus();
-        while  (chessHistory.size()>1) 
+        while (chessHistory.size() > 0)
             chessHistory.remove(chessHistory.size() - 1);
         addHistory();
     }
@@ -254,21 +319,20 @@ public class Chessboard extends JComponent {
             for (ChessComponent chessComponent : chessComponents) {
                 buf.append(chessComponent.toString());
             }
-            buf.append("\n");
+            buf.append("/");
         }
         buf.append(curUser);
         chessHistory.add(buf.toString());
     }
 
     public void removeHistory() {
-        if (chessHistory.size()>1) {
+        if (chessHistory.size() > 0) {
             chessHistory.remove(chessHistory.size() - 1);
         }
     }
 
-    public void clearHistory(){
+    public void clearHistory() {
         chessHistory.clear();
     };
-
 
 }

@@ -40,10 +40,5 @@ public class EmptySlotComponent extends ChessComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (isReached()){
-            g.setColor(Color.GREEN);
-            g.drawOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
-        }
-
     }
 }

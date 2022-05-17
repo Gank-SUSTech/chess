@@ -8,6 +8,7 @@ import java.util.List;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+
 /**
  * 这个类是一个抽象类，主要表示8*8棋盘上每个格子的棋子情况，当前有两个子类继承它，分别是EmptySlotComponent(空棋子)和RookChessComponent(车)。
  */
@@ -21,8 +22,9 @@ public abstract class ChessComponent extends JComponent {
      * 因此每个棋子占用的形状是一个正方形，大小是50*50
      */
 
-//    private static final Dimension CHESSGRID_SIZE = new Dimension(1080 / 4 * 3 / 8, 1080 / 4 * 3 / 8);
-    private static final Color[] BACKGROUND_COLORS = {Color.WHITE, Color.BLACK};
+    // private static final Dimension CHESSGRID_SIZE = new Dimension(1080 / 4 * 3 /
+    // 8, 1080 / 4 * 3 / 8);
+    private static final Color[] BACKGROUND_COLORS = { Color.WHITE, Color.BLACK };
     /**
      * handle click event
      */
@@ -39,8 +41,10 @@ public abstract class ChessComponent extends JComponent {
     protected final ChessColor chessColor;
     private boolean selected;
     private boolean reached;
+    private boolean mouseEntered;
 
-    protected ChessComponent(ChessboardPoint chessboardPoint, Point location, ChessColor chessColor, ClickController clickController, int size) {
+    protected ChessComponent(ChessboardPoint chessboardPoint, Point location, ChessColor chessColor,
+            ClickController clickController, int size) {
         enableEvents(AWTEvent.MOUSE_EVENT_MASK);
         setLocation(location);
         setSize(size, size);
@@ -68,6 +72,9 @@ public abstract class ChessComponent extends JComponent {
 
     public boolean isReached() {
         return reached;
+    }
+    public boolean isEntered() {
+        return mouseEntered;
     }
 
     public void setSelected(boolean selected) {
@@ -102,20 +109,33 @@ public abstract class ChessComponent extends JComponent {
         super.processMouseEvent(e);
 
         if (e.getID() == MouseEvent.MOUSE_PRESSED) {
-//            System.out.printf("Click [%d,%d]\n", chessboardPoint.getX(), chessboardPoint.getY());
+            // System.out.printf("Click [%d,%d]\n", chessboardPoint.getX(),
+            // chessboardPoint.getY());
             clickController.onClick(this);
         }
+        if (e.getID() == MouseEvent.MOUSE_ENTERED) {
+            this.mouseEntered=true;
+            this.repaint();
+        }
+        if (e.getID() == MouseEvent.MOUSE_EXITED) {
+            this.mouseEntered=false;
+            this.repaint();
+        }
+
+
     }
 
     /**
      * @param chessboard  棋盘
      * @param destination 目标位置，如(0, 0), (0, 7)等等
      * @return this棋子对象的移动规则和当前位置(chessboardPoint)能否到达目标位置
-     * <br>
-     * 这个方法主要是检查移动的合法性，如果合法就返回true，反之是false
+     *         <br>
+     *         这个方法主要是检查移动的合法性，如果合法就返回true，反之是false
      */
     public abstract boolean canMoveTo(ChessComponent[][] chessboard, ChessboardPoint destination);
+
     public abstract List<ChessboardPoint> canMoveTo(ChessComponent[][] chessboard);
+
     /**
      * 这个方法主要用于加载一些特定资源，如棋子图片等等。
      *
@@ -126,10 +146,25 @@ public abstract class ChessComponent extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponents(g);
-//        System.out.printf("repaint chess [%d,%d]\n", chessboardPoint.getX(), chessboardPoint.getY());
+        // System.out.printf("repaint chess [%d,%d]\n", chessboardPoint.getX(),
+        // chessboardPoint.getY());
         Color squareColor = BACKGROUND_COLORS[(chessboardPoint.getX() + chessboardPoint.getY()) % 2];
         g.setColor(squareColor);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        if (isEntered()){
+            g.setColor(Color.BLUE);
+            g.drawOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
+            g.fillOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
+        }
+        if (isReached()){
+            g.setColor(Color.GREEN);
+            g.drawOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
+        }
+        if (isSelected()) { // Highlights the model if selected.
+            g.setColor(Color.RED);
+            g.drawOval(0, 0, getWidth(), getHeight());
+        }
+
     }
 
     public abstract String toString();
