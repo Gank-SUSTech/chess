@@ -34,6 +34,7 @@ public class Chessboard extends JComponent {
 
     private List<String> chessHistory = new ArrayList<>();
 
+    // private Thread worker;
     public Chessboard(int width, int height) {
         setLayout(null); // Use absolute layout.
         setSize(width, height);
@@ -41,10 +42,6 @@ public class Chessboard extends JComponent {
         initBoard();
         addHistory();
     }
-
-    // public void setClickControllerPlayback() {
-        // this.clickController = new ClickControllerPlayback(this);
-    // }
 
     public ChessComponent[][] getChessComponents() {
         return chessComponents;
@@ -77,44 +74,39 @@ public class Chessboard extends JComponent {
         chess1.swapLocation(chess2);
         int row1 = chess1.getChessboardPoint().getX(), col1 = chess1.getChessboardPoint().getY();
         chessComponents[row1][col1] = chess1;
-        ChessColor chessColor = chess1.getChessColor();
         int row2 = chess2.getChessboardPoint().getX(), col2 = chess2.getChessboardPoint().getY();
         chessComponents[row2][col2] = chess2;
 
         if (chess1 instanceof PawnChessComponent) {
             if (row1 == 0 || row1 == 7) {
-                int sl = JOptionPane.showOptionDialog(null, "请选择要变的棋子", "恭喜兵升变", JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.QUESTION_MESSAGE, null, new String[] { "Queen", "Rook", "Knight", "Bishop" },
+                int sl = JOptionPane.showOptionDialog(null, "promote to ", "Congratulations",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE, null, new String[] { "Queen", "Rook", "Knight", "Bishop" },
                         "Queen");
                 switch (sl) {
-                    case 0:
-                        remove(chess1);
-                        add(chess1 = new QueenChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chessColor, clickController, CHESS_SIZE));
-                        chessComponents[row1][col1] = chess1;
-                        break;
                     case 1:
                         remove(chess1);
                         add(chess1 = new RookChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chessColor, clickController, CHESS_SIZE));
+                                chess1.getChessColor(), clickController, CHESS_SIZE));
                         chessComponents[row1][col1] = chess1;
                         break;
                     case 2:
                         remove(chess1);
                         add(chess1 = new KnightChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chessColor, clickController, CHESS_SIZE));
+                                chess1.getChessColor(), clickController, CHESS_SIZE));
                         chessComponents[row1][col1] = chess1;
                         break;
                     case 3:
                         remove(chess1);
                         add(chess1 = new BishopChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chessColor, clickController, CHESS_SIZE));
+                                chess1.getChessColor(), clickController, CHESS_SIZE));
                         chessComponents[row1][col1] = chess1;
                         break;
+                    case 0:
                     default:
                         remove(chess1);
                         add(chess1 = new QueenChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chessColor, clickController, CHESS_SIZE));
+                                chess1.getChessColor(), clickController, CHESS_SIZE));
                         chessComponents[row1][col1] = chess1;
                         break;
                 }
@@ -275,7 +267,7 @@ public class Chessboard extends JComponent {
 
     public void setStatus() {
         JLabel x = (JLabel) this.getParent().getComponent(1);
-        String str = currentColor == ChessColor.WHITE ? " Player: White" : " Player: Black";
+        String str = currentColor == ChessColor.WHITE ? "Player: White" : "Player: Black";
         x.setText(str);
     }
 

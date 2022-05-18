@@ -37,6 +37,7 @@ public class EmptySlotComponent extends ChessComponent {
     public String toString() {
         return "_";
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

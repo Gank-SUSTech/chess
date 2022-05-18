@@ -43,7 +43,6 @@ public class KingChessComponent extends ChessComponent {
         }
     }
 
-
     /**
      * 在构造棋子对象的时候，调用此方法以根据颜色确定kingImage的图片是哪一种
      *
@@ -63,7 +62,8 @@ public class KingChessComponent extends ChessComponent {
         }
     }
 
-    public KingChessComponent(ChessboardPoint chessboardPoint, Point location, ChessColor color, ClickController listener, int size) {
+    public KingChessComponent(ChessboardPoint chessboardPoint, Point location, ChessColor color,
+                              ClickController listener, int size) {
         super(chessboardPoint, location, color, listener, size);
         initiateKingImage(color);
     }
@@ -78,8 +78,8 @@ public class KingChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
-        List<ChessboardPoint> lChessboardPoints = canMoveTo(chessComponents);
-        for (ChessboardPoint chessboardPoint : lChessboardPoints) {
+        List<ChessboardPoint> ChessboardPointsList = canMoveTo(chessComponents);
+        for (ChessboardPoint chessboardPoint : ChessboardPointsList) {
             if (chessboardPoint.toString().equals(destination.toString()))
                 return true;
         }
@@ -88,19 +88,22 @@ public class KingChessComponent extends ChessComponent {
 
     @Override
     public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
-        List<ChessboardPoint> lChessboardPoints = new ArrayList<>();
+        List<ChessboardPoint> ChessboardPointsList = new ArrayList<>();
         ChessboardPoint source = getChessboardPoint();
         int row = source.getX(), col = source.getY();
-        int[][] delta = {{0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {-1, -1}};
-        for (int[] x : delta) {
-            int i = x[0], j = x[1];
-            if (source.offset(i, j) != null) {
-                if (chessComponents[row + i][col + j].getChessColor() != getChessColor() || chessComponents[row + i][col + j] instanceof EmptySlotComponent)
-                    lChessboardPoints.add(source.offset(i, j));
+
+        int[][] dxdyArray = {{0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {-1, -1}};
+        for (int[] dxdy : dxdyArray) {
+            int dx = dxdy[0], dy = dxdy[1];
+            if (source.offset(dx, dy) != null) {
+                if (chessComponents[row + dx][col + dy].getChessColor() != getChessColor()
+                        || chessComponents[row + dx][col + dy] instanceof EmptySlotComponent)
+                    ChessboardPointsList.add(source.offset(dx, dy));
             }
         }
-        lChessboardPoints.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-        return lChessboardPoints;
+
+        ChessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        return ChessboardPointsList;
     }
 
     /**
@@ -111,7 +114,7 @@ public class KingChessComponent extends ChessComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-//        g.drawImage(rookImage, 0, 0, getWidth() - 13, getHeight() - 20, this);
+        // g.drawImage(rookImage, 0, 0, getWidth() - 13, getHeight() - 20, this);
         g.drawImage(kingImage, 0, 0, getWidth(), getHeight(), this);
         g.setColor(Color.BLACK);
         if (isSelected()) { // Highlights the model if selected.

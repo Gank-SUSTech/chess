@@ -153,7 +153,6 @@ public abstract class ChessComponent extends JComponent {
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         if (isEntered()){
             g.setColor(Color.BLUE);
-            g.drawOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
             g.fillOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
         }
         if (isReached()){
