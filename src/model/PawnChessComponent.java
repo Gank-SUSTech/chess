@@ -76,8 +76,8 @@ public class PawnChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
-        List<ChessboardPoint> ChessboardPointsList = canMoveTo(chessComponents);
-        for (ChessboardPoint chessboardPoint : ChessboardPointsList) {
+        List<ChessboardPoint> chessboardPointsList = canMoveTo(chessComponents);
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
             if (chessboardPoint.toString().equals(destination.toString()))
                 return true;
         }
@@ -86,7 +86,7 @@ public class PawnChessComponent extends ChessComponent {
 
     @Override
     public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
-        List<ChessboardPoint> ChessboardPointsList = new ArrayList<>();
+        List<ChessboardPoint> chessboardPointsList = new ArrayList<>();
         ChessboardPoint source = getChessboardPoint();
         int row = source.getX(), col = source.getY();
         ChessColor chessColor = getChessColor();
@@ -94,25 +94,25 @@ public class PawnChessComponent extends ChessComponent {
             case BLACK: {
                 if (source.getX() == 1) { //First step
                     if (chessComponents[2][col] instanceof EmptySlotComponent) {
-                        ChessboardPointsList.add(source.offset(1, 0));
+                        chessboardPointsList.add(source.offset(1, 0));
                         if (chessComponents[3][col] instanceof EmptySlotComponent)
-                            ChessboardPointsList.add(source.offset(2, 0));
+                            chessboardPointsList.add(source.offset(2, 0));
                     }
 
                 } else { //not first step
                     if (source.offset(1, 0) != null) {
                         if (chessComponents[row + 1][col] instanceof EmptySlotComponent) {
-                            ChessboardPointsList.add(source.offset(1, 0));
+                            chessboardPointsList.add(source.offset(1, 0));
                         }
                     }
                 }
                 if (source.offset(1, 1) != null) { // chess can eat
                     if (chessComponents[row + 1][col + 1].getChessColor() == ChessColor.WHITE)
-                        ChessboardPointsList.add(source.offset(1, 1));
+                        chessboardPointsList.add(source.offset(1, 1));
                 }
                 if (source.offset(1, -1) != null) {// chess can eat
                     if (chessComponents[row + 1][col - 1].getChessColor() == ChessColor.WHITE)
-                        ChessboardPointsList.add(source.offset(1, -1));
+                        chessboardPointsList.add(source.offset(1, -1));
                 }
                 break;
                 // Capture the passing way Pawn
@@ -121,25 +121,25 @@ public class PawnChessComponent extends ChessComponent {
             case WHITE: {
                 if (source.getX() == 6) {
                     if (chessComponents[5][col] instanceof EmptySlotComponent) {
-                        ChessboardPointsList.add(source.offset(-1, 0));
+                        chessboardPointsList.add(source.offset(-1, 0));
                         if (chessComponents[4][col] instanceof EmptySlotComponent)
-                            ChessboardPointsList.add(source.offset(-2, 0));
+                            chessboardPointsList.add(source.offset(-2, 0));
                     }
 
                 } else {
                     if (source.offset(-1, 0) != null) {
                         if (chessComponents[row - 1][col] instanceof EmptySlotComponent) {
-                            ChessboardPointsList.add(source.offset(-1, 0));
+                            chessboardPointsList.add(source.offset(-1, 0));
                         }
                     }
                 }
                 if (source.offset(-1, -1) != null) {
                     if (chessComponents[row - 1][col - 1].getChessColor() == ChessColor.BLACK)
-                        ChessboardPointsList.add(source.offset(-1, -1));
+                        chessboardPointsList.add(source.offset(-1, -1));
                 }
                 if (source.offset(-1, 1) != null) {
                     if (chessComponents[row - 1][col + 1].getChessColor() == ChessColor.BLACK)
-                        ChessboardPointsList.add(source.offset(-1, 1));
+                        chessboardPointsList.add(source.offset(-1, 1));
                 }
                 break;
             }
@@ -147,8 +147,8 @@ public class PawnChessComponent extends ChessComponent {
                 break;
             }
         }
-        ChessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-        return ChessboardPointsList;
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        return chessboardPointsList;
     }
 
     /**

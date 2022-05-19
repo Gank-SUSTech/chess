@@ -151,10 +151,6 @@ public abstract class ChessComponent extends JComponent {
         Color squareColor = BACKGROUND_COLORS[(chessboardPoint.getX() + chessboardPoint.getY()) % 2];
         g.setColor(squareColor);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
-        if (isEntered()){
-            g.setColor(Color.BLUE);
-            g.fillOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
-        }
         if (isReached()){
             g.setColor(Color.GREEN);
             g.drawOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
@@ -162,6 +158,10 @@ public abstract class ChessComponent extends JComponent {
         if (isSelected()) { // Highlights the model if selected.
             g.setColor(Color.RED);
             g.drawOval(0, 0, getWidth(), getHeight());
+        }
+        if (isEntered()){
+            g.setColor(Color.BLUE);
+            g.fillOval(getWidth()/4, getHeight()/4, getWidth()/2, getHeight()/2);
         }
 
     }

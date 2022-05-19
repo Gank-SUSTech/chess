@@ -7,6 +7,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GameController {
@@ -67,6 +68,7 @@ public class GameController {
             }
             if (checkChessData(chessData)) {
                 chessboard.loadGame(chessData);
+                chessboard.setGameOver(false);
                 return chessData;
             }
         }
@@ -76,10 +78,7 @@ public class GameController {
     private boolean checkChessData(List<String> chessDatas) {
         for (String str : chessDatas) {
             String[] strings = str.split("/");
-            List<String> chessData = new ArrayList<>();
-            for (String s : strings) {
-                chessData.add(s);
-            }
+            List<String> chessData = new ArrayList<>(Arrays.asList(strings));
 
             if (chessData.size() == 8) {
                 JOptionPane.showMessageDialog(null, "缺少行棋方\n" +
@@ -121,6 +120,7 @@ public class GameController {
         chessboard.clear();
         chessboard.clearHistory();
         chessboard.addHistory();
+        chessboard.setGameOver(false);
     }
 
     public void saveGameToFile() {
@@ -162,12 +162,14 @@ public class GameController {
     }
 
     public void withdraw() {
-        List<String> chessHistory = chessboard.getChessHistory();
-        if (chessHistory.size() > 1) {
-            chessboard.removeHistory();
-            chessboard.loadGame(chessHistory);
-        } else {
-            JOptionPane.showMessageDialog(null, "无棋可悔", "alert", JOptionPane.INFORMATION_MESSAGE);
+        if (!chessboard.getGameOver()) {
+            List<String> chessHistory = chessboard.getChessHistory();
+            if (chessHistory.size() > 1) {
+                chessboard.removeHistory();
+                chessboard.loadGame(chessHistory);
+            } else {
+                JOptionPane.showMessageDialog(null, "无棋可悔", "alert", JOptionPane.INFORMATION_MESSAGE);
+            }
         }
     }
 

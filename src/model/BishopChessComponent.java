@@ -78,8 +78,8 @@ public class BishopChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
-        List<ChessboardPoint> ChessboardPointsList = canMoveTo(chessComponents);
-        for (ChessboardPoint chessboardPoint : ChessboardPointsList) {
+        List<ChessboardPoint> chessboardPointsList = canMoveTo(chessComponents);
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
             if (chessboardPoint.toString().equals(destination.toString()))
                 return true;
         }
@@ -88,7 +88,7 @@ public class BishopChessComponent extends ChessComponent {
 
     @Override
     public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
-        List<ChessboardPoint> ChessboardPointsList = new ArrayList<>();
+        List<ChessboardPoint> chessboardPointsList = new ArrayList<>();
         ChessboardPoint source = getChessboardPoint();
         int row = source.getX();
         int col = source.getY();
@@ -99,12 +99,12 @@ public class BishopChessComponent extends ChessComponent {
                     && col + j < 8; i = i + dx, j = j + dy) {
                 if (source.offset(i, j) != null) {
                     if (chessComponents[row + i][col + j] instanceof EmptySlotComponent) {
-                        ChessboardPointsList.add(source.offset(i, j));
+                        chessboardPointsList.add(source.offset(i, j));
                     } else {
                         if (chessComponents[row + i][col + j].getChessColor() == getChessColor())
                             break;
                         if (chessComponents[row + i][col + j].getChessColor() != getChessColor()) {
-                            ChessboardPointsList.add(source.offset(i, j));
+                            chessboardPointsList.add(source.offset(i, j));
                             break;
                         }
                     }
@@ -112,8 +112,8 @@ public class BishopChessComponent extends ChessComponent {
             }
         }
 
-        ChessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-        return ChessboardPointsList;
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        return chessboardPointsList;
     }
 
     /**

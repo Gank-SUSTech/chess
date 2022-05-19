@@ -12,26 +12,30 @@ public class ClickController {
     private final Chessboard chessboard;
     private ChessComponent first, chessPassingPawn = null;
 
+
     public ClickController(Chessboard chessboard) {
         this.chessboard = chessboard;
     }
 
-    public List<ChessboardPoint> ChessboardPointsList = new ArrayList<>();
+    public List<ChessboardPoint> chessboardPointsList = new ArrayList<>();
 
     private ChessboardPoint passPawnPoint = null;
 
     public void onClick(ChessComponent chessComponent) {
+        boolean gameOver = chessboard.getGameOver();
+        if (gameOver)
+            return;
         if (first == null) {
             if (handleFirst(chessComponent)) {
                 chessComponent.setSelected(true);
                 first = chessComponent;
                 first.repaint();
-                ChessboardPointsList = first.canMoveTo(chessboard.getChessComponents());
+                chessboardPointsList = first.canMoveTo(chessboard.getChessComponents());
                 if (first instanceof PawnChessComponent) { // 是否过路兵
                     processPawn();
                 }
 
-                for (ChessboardPoint chessboardPoint : ChessboardPointsList) { // CanReached
+                for (ChessboardPoint chessboardPoint : chessboardPointsList) { // CanReached
                     int x = chessboardPoint.getX(), y = chessboardPoint.getY();
                     chessboard.getChessComponents()[x][y].setReached(true);
                     chessboard.getChessComponents()[x][y].repaint();
@@ -40,7 +44,7 @@ public class ClickController {
         } else {
             if (first == chessComponent) { // 再次点击取消选取
                 chessComponent.setSelected(false);
-                for (ChessboardPoint chessboardPoint : ChessboardPointsList) {
+                for (ChessboardPoint chessboardPoint : chessboardPointsList) {
                     int x = chessboardPoint.getX(), y = chessboardPoint.getY();
                     chessboard.getChessComponents()[x][y].setReached(false);
                     chessboard.getChessComponents()[x][y].repaint();
@@ -50,14 +54,15 @@ public class ClickController {
                 recordFirst.repaint();
             } else if (handleSecond(chessComponent)) {
                 // repaint in swap chess method.
-                for (ChessboardPoint chessboardPoint : ChessboardPointsList) {
+                for (ChessboardPoint chessboardPoint : chessboardPointsList) {
                     int x = chessboardPoint.getX(), y = chessboardPoint.getY();
                     chessboard.getChessComponents()[x][y].setReached(false);
                     chessboard.getChessComponents()[x][y].repaint();
                 }
                 if (isPassPawn(chessComponent)) {
                     if (chessPassingPawn instanceof PawnChessComponent) {
-                        int row2 = chessPassingPawn.getChessboardPoint().getX(), col2 = chessPassingPawn.getChessboardPoint().getY();
+                        int row2 = chessPassingPawn.getChessboardPoint().getX(),
+                                col2 = chessPassingPawn.getChessboardPoint().getY();
                         chessboard.remove(chessPassingPawn);
                         chessboard.add(chessPassingPawn = new EmptySlotComponent(chessPassingPawn.getChessboardPoint(),
                                 chessPassingPawn.getLocation(), this, chessboard.getCHESS_SIZE()));
@@ -69,28 +74,51 @@ public class ClickController {
                 }
                 chessboard.swapChessComponents(first, chessComponent);
                 chessboard.swapColor();
-                if (isCheck())
-                    JOptionPane.showMessageDialog(null, "将军！", "alert", JOptionPane.WARNING_MESSAGE);
                 first.setSelected(false);
                 first.repaint();
-                first = null;
+//                chessComponent.repaint();
                 chessboard.addHistory();
-                ChessboardPointsList.clear();
-            }
+                chessboardPointsList.clear();
 
+                int checkResult = isCheck();
+
+                // 0:没有将 ; 1:有将但未将死 2:王被将死
+                switch (checkResult) {
+                    case 1:
+                        JOptionPane.showMessageDialog(null, "将军！", "alert", JOptionPane.WARNING_MESSAGE);
+                        break;
+                    case 2:
+                        String msg = first.getChessColor().getName() + " 方取得胜利!";
+                        JOptionPane.showMessageDialog(null, msg, "alert", JOptionPane.WARNING_MESSAGE);
+                        gameOver();
+                        break;
+                    case 0:
+                    default:
+                        break;
+                }
+                first = null;
+            }
         }
-        chessboard.setStatus();
+        if (! chessboard.getGameOver()) {
+            chessboard.setStatus();
+        }
     }
+
+    private void gameOver() {
+        chessboard.setGameOver(true);
+    }
+
 
     private void processPawn() {
         ChessComponent[][] chessComponents = chessboard.getChessComponents();
-        int[] dyArray = { -1, 1 };
+        int[] dyArray = {-1, 1};
         int x = first.getChessboardPoint().getX();
+        int y = first.getChessboardPoint().getY();
         ChessColor chessColor = first.getChessColor();
 
         for (int dy : dyArray) {
             if (x == 3 && chessColor == ChessColor.WHITE) {
-                int y = first.getChessboardPoint().getY();
+                // int y = first.getChessboardPoint().getY();
                 if (first.getChessboardPoint().offset(0, dy) != null) {
                     ChessComponent c = chessComponents[3][y + dy];
                     if (c instanceof PawnChessComponent && c.getChessColor() == ChessColor.BLACK) {
@@ -98,7 +126,7 @@ public class ClickController {
                             int historyIndex = chessboard.getChessHistory().size() - 2;
                             String cb = chessboard.getChessHistory().get(historyIndex);
                             if (cb.substring(9 + y + dy, 9 + y + dy + 1).equals("P")) {
-                                ChessboardPointsList.add(first.getChessboardPoint().offset(-1, dy));
+                                chessboardPointsList.add(first.getChessboardPoint().offset(-1, dy));
                                 passPawnPoint = first.getChessboardPoint().offset(-1, dy);
                                 chessPassingPawn = c;
                             }
@@ -107,7 +135,7 @@ public class ClickController {
                 }
             }
             if (x == 4 && chessColor == ChessColor.BLACK) {
-                int y = first.getChessboardPoint().getY();
+                // int y = first.getChessboardPoint().getY();
                 if (first.getChessboardPoint().offset(0, dy) != null) {
                     ChessComponent c = chessComponents[4][y + dy];
                     if (c instanceof PawnChessComponent && c.getChessColor() == ChessColor.WHITE) {
@@ -115,7 +143,7 @@ public class ClickController {
                             int historyIndex = chessboard.getChessHistory().size() - 2;
                             String cb = chessboard.getChessHistory().get(historyIndex);
                             if (cb.substring(54 + y + dy, 54 + y + dy + 1).equals("p")) {
-                                ChessboardPointsList.add(first.getChessboardPoint().offset(1, dy));
+                                chessboardPointsList.add(first.getChessboardPoint().offset(1, dy));
                                 passPawnPoint = first.getChessboardPoint().offset(1, dy);
                                 chessPassingPawn = c;
                             }
@@ -146,22 +174,106 @@ public class ClickController {
                         isPassPawn(chessComponent)));
     }
 
-    boolean isCheck() {
+    /*
+     * @return 0:没有将 ; 1:有将但未将死 2:王被将死
+     */
+    private int isCheck() {
         ChessComponent[][] chessComponents = chessboard.getChessComponents();
-        List<ChessboardPoint> ChessboardPointsList = new ArrayList<>();
-        for (ChessComponent[] chessComponents2 : chessComponents)
-            for (ChessComponent chess : chessComponents2)
-                if (chess.getChessColor() == first.getChessColor()){
-                    ChessboardPointsList.addAll(chess.canMoveTo(chessComponents));
-                }
+        List<ChessboardPoint> canEatPointsList = new ArrayList<>(); // 将军方所有可吃子的位置列表
+        List<ChessboardPoint> oneCanEatPointsList; // 某一个子可吃子的位置列表
+        List<ChessComponent> checkChessList = new ArrayList<>(); // 可以将军的棋子列表
+        ChessComponent chessKing = null;
 
+        // 获得 King 王
         for (ChessComponent[] chessComponents2 : chessComponents)
             for (ChessComponent chess : chessComponents2)
                 if (chess instanceof KingChessComponent && chess.getChessColor() == chessboard.getCurrentColor()) {
-                    ChessboardPoint destination = chess.getChessboardPoint();
-                    return isContains(ChessboardPointsList, destination);
+                    chessKing = chess;
+                    break;
                 }
-        return false;
+
+        if (chessKing == null) {
+            gameOver();
+            return 2;
+        }
+        ChessboardPoint kingPoint = chessKing.getChessboardPoint();
+
+        for (ChessComponent[] chessComponents2 : chessComponents)
+            for (ChessComponent chess : chessComponents2)
+                if (chess.getChessColor() == first.getChessColor()) {
+                    oneCanEatPointsList = chess.canMoveTo(chessComponents);
+                    if (isContains(oneCanEatPointsList, kingPoint)) {
+                        checkChessList.add(chess);
+                        canEatPointsList.addAll(oneCanEatPointsList);
+                    }
+                }
+
+        if (checkChessList.size() == 0) // 没有将军
+            return 0;
+
+        if (checkChessList.size() > 1) { // 双将
+            for (ChessboardPoint chessboardPoint : chessKing.canMoveTo(chessComponents)) {
+                // King can move
+                if (!isContains(canEatPointsList, chessboardPoint))
+                    return 1;
+            }
+            return 2;
+        }
+
+        // (checkChessList.size() == 1) 1个子将
+        ChessComponent checkChess = checkChessList.get(0);
+
+        // King can move
+        for (ChessboardPoint chessboardPoint : chessKing.canMoveTo(chessComponents)) {
+            if (!isContains(canEatPointsList, chessboardPoint)) {
+                return 1;
+            }
+        }
+
+        // can eat checkChess
+        List<ChessboardPoint> kingCanEatPointsList = new ArrayList<>();
+        for (ChessComponent[] chessComponents2 : chessComponents)
+            for (ChessComponent chess : chessComponents2)
+                if (chess.getChessColor() == chessKing.getChessColor()) {
+                    kingCanEatPointsList.addAll(chess.canMoveTo(chessComponents));
+                }
+        if (isContains(kingCanEatPointsList, checkChess.getChessboardPoint())) {
+            return 1;
+        }
+
+        // can place 垫子
+        if (checkChess instanceof RookChessComponent || checkChess instanceof QueenChessComponent
+                || checkChess instanceof BishopChessComponent) {
+            int x1 = checkChess.getChessboardPoint().getX(), y1 = checkChess.getChessboardPoint().getY();
+            int x2 = chessKing.getChessboardPoint().getX(), y2 = chessKing.getChessboardPoint().getY();
+            int xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
+            int yMin = Math.min(y1, y2), yMax = Math.max(y1, y2);
+            List<ChessboardPoint> canPlacePointsList = new ArrayList<>();
+            if (x1 == x2 && y1 != y2) {
+                for (int i = yMin + 1; i < yMax; i++) {
+                    canPlacePointsList.add(new ChessboardPoint(x1, i));
+                }
+            }
+            if (y1 == y2 && x1 != x2) {
+                for (int i = xMin + 1; i < xMax; i++) {
+                    canPlacePointsList.add(new ChessboardPoint(i, y1));
+                }
+            }
+            if (x1 != x2 && y1 != y2) {
+                int dx = x1 < x2 ? 1 : -1;
+                int dy = y1 < y2 ? 1 : -1;
+                for (int i = x1 + dx, j = y1 + dy; i != x2 && j != y2; i = i + dx, j = j + dy) {
+                    canPlacePointsList.add(new ChessboardPoint(i, j));
+                }
+            }
+
+            for (ChessboardPoint chessboardPoint : kingCanEatPointsList) {
+                if (isContains(canPlacePointsList, chessboardPoint)) {
+                    return 1;
+                }
+            }
+        }
+        return 2;
     }
 
     private boolean isContains(List<ChessboardPoint> chessboardPointList, ChessboardPoint destination) {
@@ -174,9 +286,7 @@ public class ClickController {
     private boolean isPassPawn(ChessComponent chessComponent) {
         if (passPawnPoint == null)
             return false;
-        if (chessComponent.getChessboardPoint().toString().equals(passPawnPoint.toString()))
-            return true;
-        return false;
+        return chessComponent.getChessboardPoint().toString().equals(passPawnPoint.toString());
     }
 
 }

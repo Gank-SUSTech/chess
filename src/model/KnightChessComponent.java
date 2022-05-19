@@ -78,9 +78,9 @@ public class KnightChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
-        List<ChessboardPoint> ChessboardPointsList = canMoveTo(chessComponents);
-        ChessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-        for (ChessboardPoint chessboardPoint : ChessboardPointsList) {
+        List<ChessboardPoint> chessboardPointsList = canMoveTo(chessComponents);
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
             if (chessboardPoint.toString().equals(destination.toString()))
                 return true;
         }
@@ -89,7 +89,7 @@ public class KnightChessComponent extends ChessComponent {
 
     @Override
     public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
-        List<ChessboardPoint> ChessboardPointsList = new ArrayList<>();
+        List<ChessboardPoint> chessboardPointsList = new ArrayList<>();
         ChessboardPoint source = getChessboardPoint();
         int row = source.getX(), col = source.getY();
         int[][] delta = {{1, 2}, {-1, 2}, {1, -2}, {-1, -2}, {2, 1}, {-2, 1}, {2, -1}, {-2, -1}};
@@ -98,13 +98,13 @@ public class KnightChessComponent extends ChessComponent {
             if (source.offset(i, j) != null) {
                 if (chessComponents[row + i][col + j].getChessColor() != getChessColor()
                         || chessComponents[row + i][col + j] instanceof EmptySlotComponent)
-                    ChessboardPointsList.add(source.offset(i, j));
+                    chessboardPointsList.add(source.offset(i, j));
             }
         }
 
 
-        ChessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-        return ChessboardPointsList;
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        return chessboardPointsList;
     }
 
 

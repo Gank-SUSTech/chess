@@ -78,8 +78,8 @@ public class KingChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
-        List<ChessboardPoint> ChessboardPointsList = canMoveTo(chessComponents);
-        for (ChessboardPoint chessboardPoint : ChessboardPointsList) {
+        List<ChessboardPoint> chessboardPointsList = canMoveTo(chessComponents);
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
             if (chessboardPoint.toString().equals(destination.toString()))
                 return true;
         }
@@ -88,7 +88,7 @@ public class KingChessComponent extends ChessComponent {
 
     @Override
     public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
-        List<ChessboardPoint> ChessboardPointsList = new ArrayList<>();
+        List<ChessboardPoint> chessboardPointsList = new ArrayList<>();
         ChessboardPoint source = getChessboardPoint();
         int row = source.getX(), col = source.getY();
 
@@ -98,12 +98,12 @@ public class KingChessComponent extends ChessComponent {
             if (source.offset(dx, dy) != null) {
                 if (chessComponents[row + dx][col + dy].getChessColor() != getChessColor()
                         || chessComponents[row + dx][col + dy] instanceof EmptySlotComponent)
-                    ChessboardPointsList.add(source.offset(dx, dy));
+                    chessboardPointsList.add(source.offset(dx, dy));
             }
         }
 
-        ChessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-        return ChessboardPointsList;
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        return chessboardPointsList;
     }
 
     /**

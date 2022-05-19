@@ -6,6 +6,7 @@ import model.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,6 +34,8 @@ public class Chessboard extends JComponent {
     private final int CHESS_SIZE;
 
     private List<String> chessHistory = new ArrayList<>();
+    private boolean gameOver = false;
+
 
     // private Thread worker;
     public Chessboard(int width, int height) {
@@ -42,6 +45,13 @@ public class Chessboard extends JComponent {
         initBoard();
         addHistory();
     }
+    public void setGameOver(boolean gameOver){
+        this.gameOver = gameOver;
+    }
+    public boolean getGameOver(){
+        return gameOver;
+    }
+
 
     public ChessComponent[][] getChessComponents() {
         return chessComponents;
@@ -188,9 +198,7 @@ public class Chessboard extends JComponent {
             String str = chessDatas.get(chessDatas.size() - 1);
             String[] strings = str.split("/");
             List<String> chessData = new ArrayList<>();
-            for (String s : strings) {
-                chessData.add(s);
-            }
+            Collections.addAll(chessData, strings);
             ChessColor black = ChessColor.BLACK, white = ChessColor.WHITE;
             for (int i = 0; i < 8; i++) {
                 String s = chessData.get(i);
@@ -325,6 +333,6 @@ public class Chessboard extends JComponent {
 
     public void clearHistory() {
         chessHistory.clear();
-    };
+    }
 
 }
