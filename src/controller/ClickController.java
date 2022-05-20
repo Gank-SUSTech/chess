@@ -12,7 +12,6 @@ public class ClickController {
     private final Chessboard chessboard;
     private ChessComponent first, chessPassingPawn = null;
 
-
     public ClickController(Chessboard chessboard) {
         this.chessboard = chessboard;
     }
@@ -31,76 +30,151 @@ public class ClickController {
                 first = chessComponent;
                 first.repaint();
                 chessboardPointsList = first.canMoveTo(chessboard.getChessComponents());
-                if (first instanceof PawnChessComponent) { // 是否过路兵
+                if (first instanceof PawnChessComponent) { 
+                    //若是兵,则找到是否有过路兵并标记出来
                     processPawn();
                 }
-
-                for (ChessboardPoint chessboardPoint : chessboardPointsList) { // CanReached
-                    int x = chessboardPoint.getX(), y = chessboardPoint.getY();
-                    chessboard.getChessComponents()[x][y].setReached(true);
-                    chessboard.getChessComponents()[x][y].repaint();
-                }
+                //标记棋子可到达位置
+                setCanReachPoint(); 
             }
         } else {
             if (first == chessComponent) { // 再次点击取消选取
                 chessComponent.setSelected(false);
-                for (ChessboardPoint chessboardPoint : chessboardPointsList) {
-                    int x = chessboardPoint.getX(), y = chessboardPoint.getY();
-                    chessboard.getChessComponents()[x][y].setReached(false);
-                    chessboard.getChessComponents()[x][y].repaint();
-                }
+                clearCanReachPoint();
                 ChessComponent recordFirst = first;
                 first = null;
                 recordFirst.repaint();
             } else if (handleSecond(chessComponent)) {
                 // repaint in swap chess method.
-                for (ChessboardPoint chessboardPoint : chessboardPointsList) {
-                    int x = chessboardPoint.getX(), y = chessboardPoint.getY();
-                    chessboard.getChessComponents()[x][y].setReached(false);
-                    chessboard.getChessComponents()[x][y].repaint();
-                }
+                //clear first chess can reached point
+                clearCanReachPoint();
                 if (isPassPawn(chessComponent)) {
-                    if (chessPassingPawn instanceof PawnChessComponent) {
-                        int row2 = chessPassingPawn.getChessboardPoint().getX(),
-                                col2 = chessPassingPawn.getChessboardPoint().getY();
-                        chessboard.remove(chessPassingPawn);
-                        chessboard.add(chessPassingPawn = new EmptySlotComponent(chessPassingPawn.getChessboardPoint(),
-                                chessPassingPawn.getLocation(), this, chessboard.getCHESS_SIZE()));
-                        chessboard.getChessComponents()[row2][col2] = chessPassingPawn;
-                        chessPassingPawn.repaint();
-                        passPawnPoint = null;
-                        chessPassingPawn = null;
-                    }
+                    //吃过路兵
+                    eatPassPawn();          
                 }
+
                 chessboard.swapChessComponents(first, chessComponent);
                 chessboard.swapColor();
+                
+                if (first instanceof PawnChessComponent) { 
+                    // 若是兵则看能否兵升变
+                    pawnPromote();
+                }
                 first.setSelected(false);
                 first.repaint();
-//                chessComponent.repaint();
+
                 chessboard.addHistory();
                 chessboardPointsList.clear();
-
-                int checkResult = isCheck();
-
-                // 0:没有将 ; 1:有将但未将死 2:王被将死
-                switch (checkResult) {
-                    case 1:
-                        JOptionPane.showMessageDialog(null, "将军！", "alert", JOptionPane.WARNING_MESSAGE);
-                        break;
-                    case 2:
-                        String msg = first.getChessColor().getName() + " 方取得胜利!";
-                        JOptionPane.showMessageDialog(null, msg, "alert", JOptionPane.WARNING_MESSAGE);
-                        gameOver();
-                        break;
-                    case 0:
-                    default:
-                        break;
-                }
+                
+                //判断是否将军及将军结果
+                check(); 
                 first = null;
             }
         }
-        if (! chessboard.getGameOver()) {
+        if (!chessboard.getGameOver()) {
             chessboard.setStatus();
+        }
+    }
+
+    /**
+     * clear first chess can reached point
+     */
+    private void clearCanReachPoint(){
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
+            int x = chessboardPoint.getX(), y = chessboardPoint.getY();
+            chessboard.getChessComponents()[x][y].setReached(false);
+            chessboard.getChessComponents()[x][y].repaint();
+        }
+    }
+
+    /**
+     * set first chess can reached point
+     */
+    private void  setCanReachPoint() {
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
+            int x = chessboardPoint.getX(), y = chessboardPoint.getY();
+            chessboard.getChessComponents()[x][y].setReached(true);
+            chessboard.getChessComponents()[x][y].repaint();
+        }
+    }
+
+    private void check(){
+        int checkResult = isCheck();
+
+        // 0:没有将 ; 1:有将但未将死 2:王被将死
+        switch (checkResult) {
+            case 1:
+                JOptionPane.showMessageDialog(null, "将军！", "alert", JOptionPane.WARNING_MESSAGE);
+                break;
+            case 2:
+                String msg = first.getChessColor().getName() + " 方取得胜利!";
+                JOptionPane.showMessageDialog(null, msg, "alert", JOptionPane.WARNING_MESSAGE);
+                gameOver();
+                break;
+            case 0:
+            default:
+                break;
+        }
+
+    }
+
+    /**
+     * 吃过路兵
+     */
+    private void eatPassPawn() {
+        if (chessPassingPawn instanceof PawnChessComponent) {
+            int row2 = chessPassingPawn.getChessboardPoint().getX(),
+                    col2 = chessPassingPawn.getChessboardPoint().getY();
+            chessboard.remove(chessPassingPawn);
+            chessboard.add(chessPassingPawn = new EmptySlotComponent(chessPassingPawn.getChessboardPoint(),
+                    chessPassingPawn.getLocation(), this, chessboard.getCHESS_SIZE()));
+            chessboard.getChessComponents()[row2][col2] = chessPassingPawn;
+            chessPassingPawn.repaint();
+            passPawnPoint = null;
+            chessPassingPawn = null;
+        }
+    }
+
+    /**
+     * 兵升变
+     */
+    private void pawnPromote() {
+        if (first instanceof PawnChessComponent) {
+            int row1 = first.getChessboardPoint().getX(), col1 = first.getChessboardPoint().getY();
+            if (row1 == 0 || row1 == 7) {
+                ChessComponent[][] chessComponents = chessboard.getChessComponents();
+                int sl = JOptionPane.showOptionDialog(null, "promote to ", "Congratulations",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE, null, new String[] { "Queen", "Rook", "Knight", "Bishop" },
+                        "Queen");
+                switch (sl) {
+                    case 1:
+                        chessboard.remove(first);
+                        chessboard.add(first = new RookChessComponent(first.getChessboardPoint(), first.getLocation(),
+                                first.getChessColor(), this, chessboard.getCHESS_SIZE()));
+                        chessComponents[row1][col1] = first;
+                        break;
+                    case 2:
+                        chessboard.remove(first);
+                        chessboard.add(first = new KnightChessComponent(first.getChessboardPoint(), first.getLocation(),
+                                first.getChessColor(), this, chessboard.getCHESS_SIZE()));
+                        chessComponents[row1][col1] = first;
+                        break;
+                    case 3:
+                        chessboard.remove(first);
+                        chessboard.add(first = new BishopChessComponent(first.getChessboardPoint(), first.getLocation(),
+                                first.getChessColor(), this, chessboard.getCHESS_SIZE()));
+                        chessComponents[row1][col1] = first;
+                        break;
+                    case 0:
+                    default:
+                        chessboard.remove(first);
+                        chessboard.add(first = new QueenChessComponent(first.getChessboardPoint(), first.getLocation(),
+                                first.getChessColor(), this, chessboard.getCHESS_SIZE()));
+                        chessComponents[row1][col1] = first;
+                        break;
+                }
+            }
         }
     }
 
@@ -108,17 +182,17 @@ public class ClickController {
         chessboard.setGameOver(true);
     }
 
-
+    /**
+     * 若first是兵,则找到是否有过路兵并标记出来
+     */
     private void processPawn() {
         ChessComponent[][] chessComponents = chessboard.getChessComponents();
-        int[] dyArray = {-1, 1};
+        int[] dyArray = { -1, 1 };
         int x = first.getChessboardPoint().getX();
         int y = first.getChessboardPoint().getY();
         ChessColor chessColor = first.getChessColor();
-
         for (int dy : dyArray) {
             if (x == 3 && chessColor == ChessColor.WHITE) {
-                // int y = first.getChessboardPoint().getY();
                 if (first.getChessboardPoint().offset(0, dy) != null) {
                     ChessComponent c = chessComponents[3][y + dy];
                     if (c instanceof PawnChessComponent && c.getChessColor() == ChessColor.BLACK) {
@@ -135,7 +209,6 @@ public class ClickController {
                 }
             }
             if (x == 4 && chessColor == ChessColor.BLACK) {
-                // int y = first.getChessboardPoint().getY();
                 if (first.getChessboardPoint().offset(0, dy) != null) {
                     ChessComponent c = chessComponents[4][y + dy];
                     if (c instanceof PawnChessComponent && c.getChessColor() == ChessColor.WHITE) {
@@ -276,9 +349,9 @@ public class ClickController {
         return 2;
     }
 
-    private boolean isContains(List<ChessboardPoint> chessboardPointList, ChessboardPoint destination) {
+    private boolean isContains(List<ChessboardPoint> chessboardPointList, ChessboardPoint another) {
         for (ChessboardPoint chessboardPoint : chessboardPointList)
-            if (chessboardPoint.toString().equals(destination.toString()))
+            if (chessboardPoint.toString().equals(another.toString()))
                 return true;
         return false;
     }

@@ -86,43 +86,6 @@ public class Chessboard extends JComponent {
         chessComponents[row1][col1] = chess1;
         int row2 = chess2.getChessboardPoint().getX(), col2 = chess2.getChessboardPoint().getY();
         chessComponents[row2][col2] = chess2;
-
-        if (chess1 instanceof PawnChessComponent) {
-            if (row1 == 0 || row1 == 7) {
-                int sl = JOptionPane.showOptionDialog(null, "promote to ", "Congratulations",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.INFORMATION_MESSAGE, null, new String[] { "Queen", "Rook", "Knight", "Bishop" },
-                        "Queen");
-                switch (sl) {
-                    case 1:
-                        remove(chess1);
-                        add(chess1 = new RookChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chess1.getChessColor(), clickController, CHESS_SIZE));
-                        chessComponents[row1][col1] = chess1;
-                        break;
-                    case 2:
-                        remove(chess1);
-                        add(chess1 = new KnightChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chess1.getChessColor(), clickController, CHESS_SIZE));
-                        chessComponents[row1][col1] = chess1;
-                        break;
-                    case 3:
-                        remove(chess1);
-                        add(chess1 = new BishopChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chess1.getChessColor(), clickController, CHESS_SIZE));
-                        chessComponents[row1][col1] = chess1;
-                        break;
-                    case 0:
-                    default:
-                        remove(chess1);
-                        add(chess1 = new QueenChessComponent(chess1.getChessboardPoint(), chess1.getLocation(),
-                                chess1.getChessColor(), clickController, CHESS_SIZE));
-                        chessComponents[row1][col1] = chess1;
-                        break;
-                }
-            }
-        }
-
         chess1.repaint();
         chess2.repaint();
     }
