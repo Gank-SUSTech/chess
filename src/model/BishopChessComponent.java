@@ -112,6 +112,7 @@ public class BishopChessComponent extends ChessComponent {
             }
         }
 
+
         chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
         return chessboardPointsList;
     }

@@ -115,8 +115,7 @@ public class PawnChessComponent extends ChessComponent {
                         chessboardPointsList.add(source.offset(1, -1));
                 }
                 break;
-                // Capture the passing way Pawn
-                // Should Design here
+
             }
             case WHITE: {
                 if (source.getX() == 6) {

@@ -28,7 +28,7 @@ public class ChessGameFrame extends JFrame {
 
         addChessboard();
         addLabel();
-        addTimeLabel();
+        addTimeLabel();//计时器
         addResetButton();
         addLoadButton();
         addSaveButton();
@@ -58,6 +58,9 @@ public class ChessGameFrame extends JFrame {
 
     }
 
+    /**
+     *
+     */
     private void addTimeLabel() {
         JLabel timeLabel = new JLabel("");
         timeLabel.setLocation(HEIGHT, HEIGHT / 10 + 50);

@@ -36,7 +36,7 @@ public class EmptySlotComponent extends ChessComponent {
     @Override
     public String toString() {
         return "_";
-    }
+    }//用下划线表示空子
 
     @Override
     protected void paintComponent(Graphics g) {

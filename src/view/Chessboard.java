@@ -227,6 +227,11 @@ public class Chessboard extends JComponent {
         for (ChessComponent[] chessComponent : chessComponents)
             for (ChessComponent component : chessComponent)
                 remove(component);
+        for (int i = 0; i < 8 ;i++) {
+            for (int j = 0; j < 8; j++) {
+                chessComponents[i][j]=null;
+            }
+        }
         this.repaint();
         initBoard();
         currentColor = ChessColor.WHITE;
@@ -274,12 +279,25 @@ public class Chessboard extends JComponent {
         return chessHistory;
     }
 
+    /**
+     * 历史列表格式如下：
+     * RNBQKBNR/PPPPPPPP/________/________/________/________/pppppppp/rnbqkbnr/w
+     * RNBQKBNR/PPPPPPPP/________/________/_____p__/________/ppppp_pp/rnbqkbnr/b
+     * RNBQKBNR/P_PPPPPP/________/_P______/_____p__/________/ppppp_pp/rnbqkbnr/w
+     *
+     * for (i=0,i<8,i++){
+     *     for (j=0,j<8,j++){
+     *         buf.append(chessComponents[i][j].toString();
+     *     }
+     *     buf.append("/");
+     * }
+     *
+     */
     public void addHistory() {
         String curUser = getCurrentColor() == ChessColor.WHITE ? "w" : "b";
-        ChessComponent[][] component = getChessComponents();
         StringBuilder buf = new StringBuilder();
-        for (ChessComponent[] chessComponents : component) {
-            for (ChessComponent chessComponent : chessComponents) {
+        for (ChessComponent[] chessComponentA : chessComponents) {
+            for (ChessComponent chessComponent : chessComponentA) {
                 buf.append(chessComponent.toString());
             }
             buf.append("/");

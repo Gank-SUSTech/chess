@@ -36,6 +36,8 @@ public abstract class ChessComponent extends JComponent {
      * chessColor: 表示这个棋子的颜色，有白色，黑色，无色三种
      * <br>
      * selected: 表示这个棋子是否被选中
+     * reached：点中的棋子可以走的位置
+     * mouseEntered：鼠标移到棋子上
      */
     private ChessboardPoint chessboardPoint;
     protected final ChessColor chessColor;
@@ -166,5 +168,9 @@ public abstract class ChessComponent extends JComponent {
 
     }
 
+    /**
+     *
+     * @return 返回棋子对应字母
+     */
     public abstract String toString();
 }
