@@ -46,7 +46,7 @@ public class ClickController {
                 recordFirst.repaint();
             } else if (handleSecond(chessComponent)) {
                 // repaint in swap chess method.
-                // clear first chess canReached point
+                // 清楚掉可到达坐标
                 clearCanReachPoint();
 
                 // 吃过路兵
@@ -99,6 +99,9 @@ public class ClickController {
         }
     }
 
+    /**
+     * 将军判断
+     */
     private void check() {
         if (isCheck()) {
             // 0:没有将 ; 1:有将但未将死 2:王被将死
@@ -248,7 +251,7 @@ public class ClickController {
                         isPassPawn(chessComponent)));
     }
 
-    /*
+    /**
      * @return 判断是否被将军
      */
     private boolean isCheck() {
@@ -278,16 +281,15 @@ public class ClickController {
     }
 
     /**
-     * 获得将军结果 2： 将死   1： 可活
-     *
-     * @return
+     * @return 获得将军结果 2：将死   1：可活  0：未将
      */
-
     private int getCheckResult() {
         ChessColor chessColor = first.getChessColor() == ChessColor.WHITE ? ChessColor.BLACK : ChessColor.WHITE;
         List<ChessboardPoint> canEatPointsList = new ArrayList<>();
         ChessComponent King = null;
         ChessComponent[][] chessComponents = chessboard.getChessComponents();
+
+        //找到 王 这个棋子
         for (ChessComponent[] chessComponents2 : chessComponents)
             for (ChessComponent chess : chessComponents2)
                 if (chess instanceof KingChessComponent && chess.getChessColor() == chessColor) {
@@ -295,14 +297,14 @@ public class ClickController {
                     break;
                 }
         if (King == null) return 2;
-        ChessboardPoint kingPoint = King.getChessboardPoint();
 
         List<ChessComponent> checkChessList = new ArrayList<>();
 
+        //获得可将军的所有棋子 及 所有将军棋子能到达的位置
         for (ChessComponent[] chessComponents2 : chessComponents)
             for (ChessComponent chess : chessComponents2)
                 if (chess.getChessColor() == first.getChessColor()) {
-                    if (isContains(chess.canMoveTo(chessComponents), kingPoint)) {
+                    if (isContains(chess.canMoveTo(chessComponents), King.getChessboardPoint())) {
                         checkChessList.add(chess);
                         canEatPointsList.addAll(chess.canMoveTo(chessComponents));
                     }
@@ -329,53 +331,22 @@ public class ClickController {
                 return 1;
             }
         }
-        // 吃子后判断是否被将
+        // 判断能否吃子或垫子
         // can eat checkChess
-        if (canEatCheckPiece(checkChess)) {
+        if (canEatCheckPiece(checkChess) ||canPlace(checkChess, King) ) {
             return 1;
-        }
-
-        // can place 垫子  以下是获得可垫子的位置坐标列表
-        if (checkChess instanceof RookChessComponent || checkChess instanceof QueenChessComponent
-                || checkChess instanceof BishopChessComponent) {
-            int x1 = checkChess.getChessboardPoint().getX(), y1 = checkChess.getChessboardPoint().getY();
-            int x2 = King.getChessboardPoint().getX(), y2 = King.getChessboardPoint().getY();
-            int xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
-            int yMin = Math.min(y1, y2), yMax = Math.max(y1, y2);
-            List<ChessboardPoint> canPlacePointsList = new ArrayList<>();
-            if (x1 == x2 && y1 != y2) {
-                for (int i = yMin + 1; i < yMax; i++) {
-                    canPlacePointsList.add(new ChessboardPoint(x1, i));
-                }
-            }
-            if (y1 == y2 && x1 != x2) {
-                for (int i = xMin + 1; i < xMax; i++) {
-                    canPlacePointsList.add(new ChessboardPoint(i, y1));
-                }
-            }
-            if (x1 != x2 && y1 != y2) {
-                int dx = x1 < x2 ? 1 : -1;
-                int dy = y1 < y2 ? 1 : -1;
-                for (int i = x1 + dx, j = y1 + dy; i != x2 && j != y2; i = i + dx, j = j + dy) {
-                    canPlacePointsList.add(new ChessboardPoint(i, j));
-                }
-            }
-            if (canPlace(canPlacePointsList))
-                return 1;
         }
         return 2;
     }
 
     /**
-     * 判断能否吃掉将军的子 （不能吃子后仍然被将）
-     *
-     * @param chess2
-     * @return
+     * @param chess2 可垫子位置的空白棋子  或是对方将军的棋子
+     * @return 能否垫子 或 吃掉对方将军的棋子
      */
     private boolean canEatCheckPiece(ChessComponent chess2) {
         ChessColor chessColor = first.getChessColor() == ChessColor.WHITE ? ChessColor.BLACK : ChessColor.WHITE;
         ChessboardPoint checkPiecePoint = chess2.getChessboardPoint();
-        ChessComponent[][] chessComponents = chessboard.getChessComponents().clone();
+        ChessComponent[][] chessComponents = chessboard.getChessComponents();
         for (ChessComponent[] chessComponents2 : chessComponents)
             for (ChessComponent chess1 : chessComponents2) {
                 if (chess1.getChessColor() == chessColor) {
@@ -401,28 +372,58 @@ public class ClickController {
         return false;
     }
 
+
     /**
-     * 判断能否垫子  （不能垫子子后仍然被将）
-     *
-     * @param canPlacePointsList
-     * @return
+     * @param checkChess 将军的棋子
+     * @param King       被将的王
+     * @return 是否能够垫子
      */
-    private boolean canPlace(List<ChessboardPoint> canPlacePointsList) {
+    private boolean canPlace(ChessComponent checkChess, ChessComponent King) {
         ChessComponent[][] chessComponents = chessboard.getChessComponents();
-        for (ChessboardPoint chess2Point : canPlacePointsList) {
-            int row = chess2Point.getX(), col = chess2Point.getY();
-            ChessComponent chess2 = chessComponents[row][col];
-            if (canEatCheckPiece(chess2)) {
-                return true;
+        // can place 垫子  以下是获得可垫子的位置坐标列表
+        if (checkChess instanceof RookChessComponent || checkChess instanceof QueenChessComponent
+                || checkChess instanceof BishopChessComponent) {
+            int x1 = checkChess.getChessboardPoint().getX(), y1 = checkChess.getChessboardPoint().getY();
+            int x2 = King.getChessboardPoint().getX(), y2 = King.getChessboardPoint().getY();
+            int xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
+            int yMin = Math.min(y1, y2), yMax = Math.max(y1, y2);
+            List<ChessboardPoint> canPlacePointsList = new ArrayList<>();
+            //两字间若是横线，可垫子位置
+            if (x1 == x2 && y1 != y2) {
+                for (int i = yMin + 1; i < yMax; i++) {
+                    canPlacePointsList.add(new ChessboardPoint(x1, i));
+                }
+            }
+            //两字间若是竖线，可垫子位置
+            if (y1 == y2 && x1 != x2) {
+                for (int i = xMin + 1; i < xMax; i++) {
+                    canPlacePointsList.add(new ChessboardPoint(i, y1));
+                }
+            }
+            //两字间若是斜线，可垫子位置
+            if (x1 != x2 && y1 != y2) {
+                int dx = x1 < x2 ? 1 : -1;
+                int dy = y1 < y2 ? 1 : -1;
+                for (int i = x1 + dx, j = y1 + dy; i != x2 && j != y2; i = i + dx, j = j + dy) {
+                    canPlacePointsList.add(new ChessboardPoint(i, j));
+                }
+            }
+            //判断是否可将子移到垫子位置（即吃掉空棋子）
+            for (ChessboardPoint chess2Point : canPlacePointsList) {
+                int row = chess2Point.getX(), col = chess2Point.getY();
+                ChessComponent chess2 = chessComponents[row][col];
+                if (canEatCheckPiece(chess2)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     /**
-     * @param chessboardPointList
-     * @param another
-     * @return
+     * @param chessboardPointList 位置坐标列表
+     * @param another             某一棋子坐标
+     * @return 位置坐标列表是否包含某一棋子坐标
      */
     private boolean isContains(List<ChessboardPoint> chessboardPointList, ChessboardPoint another) {
         for (ChessboardPoint chessboardPoint : chessboardPointList)
@@ -431,6 +432,10 @@ public class ClickController {
         return false;
     }
 
+    /**
+     * @param chessComponent 过路兵棋子
+     * @return 是否是过路兵
+     */
     private boolean isPassPawn(ChessComponent chessComponent) {
         if (passPawnPoint == null)
             return false;
