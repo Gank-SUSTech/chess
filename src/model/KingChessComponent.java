@@ -1,7 +1,7 @@
 package model;
 
-import view.ChessboardPoint;
 import controller.ClickController;
+import view.ChessboardPoint;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 /**
  * 这个类表示国际象棋里面的 King
  */
@@ -42,7 +43,6 @@ public class KingChessComponent extends ChessComponent {
         }
     }
 
-
     /**
      * 在构造棋子对象的时候，调用此方法以根据颜色确定kingImage的图片是哪一种
      *
@@ -62,7 +62,8 @@ public class KingChessComponent extends ChessComponent {
         }
     }
 
-    public KingChessComponent (ChessboardPoint chessboardPoint, Point location, ChessColor color, ClickController listener, int size) {
+    public KingChessComponent(ChessboardPoint chessboardPoint, Point location, ChessColor color,
+                              ClickController listener, int size) {
         super(chessboardPoint, location, color, listener, size);
         initiateKingImage(color);
     }
@@ -77,23 +78,32 @@ public class KingChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
-        List<ChessboardPoint> lChessboardPoints = new ArrayList<>();
-        ChessboardPoint source = getChessboardPoint();
-        int row = source.getX(), col = source.getY();
-        int[][] delta = {{0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {-1, -1}};
-        for (int[] x : delta) {
-            int i = x[0], j = x[1];
-            if (source.offset(i, j) != null) {
-                if (chessComponents[row + i][col + j].getChessColor() != getChessColor() || chessComponents[row + i][col + j] instanceof EmptySlotComponent)
-                    lChessboardPoints.add(source.offset(i, j));
-            }
-        }
-        lChessboardPoints.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-        for (ChessboardPoint chessboardPoint : lChessboardPoints) {
-            if (chessboardPoint.getX()==destination.getX() && chessboardPoint.getY()==destination.getY())
-            return true;
+        List<ChessboardPoint> chessboardPointsList = canMoveTo(chessComponents);
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
+            if (chessboardPoint.toString().equals(destination.toString()))
+                return true;
         }
         return false;
+    }
+
+    @Override
+    public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
+        List<ChessboardPoint> chessboardPointsList = new ArrayList<>();
+        ChessboardPoint source = getChessboardPoint();
+        int row = source.getX(), col = source.getY();
+
+        int[][] dxdyArray = {{0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {-1, -1}};
+        for (int[] dxdy : dxdyArray) {
+            int dx = dxdy[0], dy = dxdy[1];
+            if (source.offset(dx, dy) != null) {
+                if (chessComponents[row + dx][col + dy].getChessColor() != getChessColor()
+                        || chessComponents[row + dx][col + dy] instanceof EmptySlotComponent)
+                    chessboardPointsList.add(source.offset(dx, dy));
+            }
+        }
+
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        return chessboardPointsList;
     }
 
     /**
@@ -104,17 +114,18 @@ public class KingChessComponent extends ChessComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-//        g.drawImage(rookImage, 0, 0, getWidth() - 13, getHeight() - 20, this);
-        g.drawImage(kingImage, 0, 0, getWidth() , getHeight(), this);
+        // g.drawImage(rookImage, 0, 0, getWidth() - 13, getHeight() - 20, this);
+        g.drawImage(kingImage, 0, 0, getWidth(), getHeight(), this);
         g.setColor(Color.BLACK);
         if (isSelected()) { // Highlights the model if selected.
             g.setColor(Color.RED);
-            g.drawOval(0, 0, getWidth() , getHeight());
+            g.drawOval(0, 0, getWidth(), getHeight());
         }
+
     }
 
     @Override
     public String toString() {
-        return  chessColor == ChessColor.WHITE ?"k":"K";
+        return chessColor == ChessColor.WHITE ? "k" : "K";
     }
 }

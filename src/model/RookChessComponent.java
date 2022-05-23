@@ -1,7 +1,7 @@
 package model;
 
-import view.ChessboardPoint;
 import controller.ClickController;
+import view.ChessboardPoint;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 /**
  * 这个类表示国际象棋里面的车
  */
@@ -77,78 +78,46 @@ public class RookChessComponent extends ChessComponent {
 
     @Override
     public boolean canMoveTo(ChessComponent[][] chessComponents, ChessboardPoint destination) {
-        List<ChessboardPoint> lChessboardPoints = new ArrayList<>();
-        ChessboardPoint source = getChessboardPoint();
-        ChessColor chessColor = getChessColor();
-        int row = source.getX();
-        int col = source.getY();
-        for (int i = 1; i + row < 8; i++) {  //do
-            if (source.offset(i, 0) != null) {
-                if (chessComponents[row + i][col] instanceof EmptySlotComponent) {
-                    lChessboardPoints.add(source.offset(i, 0));
-                } else {
-                    if (chessComponents[row + i][col].getChessColor() != chessColor) {
-                        lChessboardPoints.add(source.offset(i, 0));
-                    }
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        for (int i = -1; row + i >= 0; i--) { // UP
-            if (source.offset(i, 0) != null) {
-                if (chessComponents[row + i][col] instanceof EmptySlotComponent) {
-                    lChessboardPoints.add(source.offset(i, 0));
-                } else {
-                    if (chessComponents[row + i][col].getChessColor() != chessColor) {
-                        lChessboardPoints.add(source.offset(i, 0));
-                    }
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        for (int i = 1; col + i < 8; i++) { //LEFT
-            if (source.offset(0, i) != null) {
-                if (chessComponents[row][col + i] instanceof EmptySlotComponent) {
-                    lChessboardPoints.add(source.offset(0, i));
-                } else {
-                    if (chessComponents[row][col + i].getChessColor() != chessColor) {
-                        lChessboardPoints.add(source.offset(0, i));
-                    }
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        for (int i = -1; col + i >= 0; i--) {  //RIGHT
-            if (source.offset(0, i) != null) {
-                if (chessComponents[row][col + i] instanceof EmptySlotComponent) {
-                    lChessboardPoints.add(source.offset(0, i));
-                } else {
-                    if (chessComponents[row][col + i].getChessColor() != chessColor) {
-                        lChessboardPoints.add(source.offset(0, i));
-                    }
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-
-        lChessboardPoints.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
-
-        for (ChessboardPoint chessboardPoint : lChessboardPoints) {
-            if (chessboardPoint.getX()==destination.getX() && chessboardPoint.getY()==destination.getY())
-            return true;
+        List<ChessboardPoint> chessboardPointsList = canMoveTo(chessComponents);
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        for (ChessboardPoint chessboardPoint : chessboardPointsList) {
+            if (chessboardPoint.toString().equals(destination.toString()))
+                return true;
         }
         return false;
-        // return lChessboardPoints.contains( destination);
     }
-        // return lChessboardPoints;
+
+    @Override
+    public List<ChessboardPoint> canMoveTo(ChessComponent[][] chessComponents) {
+        List<ChessboardPoint> chessboardPointsList = new ArrayList<>();
+        ChessboardPoint source = getChessboardPoint();
+        // ChessColor chessColor = getChessColor();
+        int row = source.getX();
+        int col = source.getY();
+        int[][] dxdyArray = { { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } };
+        for (int[] dxdy : dxdyArray) {
+            int dx = dxdy[0], dy = dxdy[1];
+            for (int i = dx, j = dy; row + i >= 0 && col + j >= 0 && row + i < 8
+                    && col + j < 8; i = i + dx, j = j + dy) {
+                if (source.offset(i, j) != null) {
+                    if (chessComponents[row + i][col + j] instanceof EmptySlotComponent) {
+                        chessboardPointsList.add(source.offset(i, j));
+                    } else {
+                        if (chessComponents[row + i][col + j].getChessColor() == getChessColor())
+                            break;
+                        if (chessComponents[row + i][col + j].getChessColor() != getChessColor()) {
+                            chessboardPointsList.add(source.offset(i, j));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        chessboardPointsList.sort(Comparator.comparing(ChessboardPoint::getX).thenComparing(ChessboardPoint::getY));
+        return chessboardPointsList;
+    }
+
     /**
      * 注意这个方法，每当窗体受到了形状的变化，或者是通知要进行绘图的时候，就会调用这个方法进行画图。
      *
@@ -158,16 +127,16 @@ public class RookChessComponent extends ChessComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 //        g.drawImage(rookImage, 0, 0, getWidth() - 13, getHeight() - 20, this);
-        g.drawImage(rookImage, 0, 0, getWidth() , getHeight(), this);
+        g.drawImage(rookImage, 0, 0, getWidth(), getHeight(), this);
         g.setColor(Color.BLACK);
         if (isSelected()) { // Highlights the model if selected.
             g.setColor(Color.RED);
-            g.drawOval(0, 0, getWidth() , getHeight());
+            g.drawOval(0, 0, getWidth(), getHeight());
         }
     }
 
     @Override
     public String toString() {
-        return  chessColor == ChessColor.WHITE ?"r":"R";
+        return chessColor == ChessColor.WHITE ? "r" : "R";
     }
 }
